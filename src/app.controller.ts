@@ -15,6 +15,7 @@ import { GetLeadsResponse } from './types';
 import { UserDto } from './dto/user.dto';
 import { UsersBodyValidation } from './pipes/users-body-validation.pipe';
 import { GetUsersBodyDto } from './dto/get-uses-body.dto';
+import { StatusDto } from './dto/status.dto';
 
 @Controller('api')
 export class AppController {
@@ -53,6 +54,11 @@ export class AppController {
   @Get('pipelines')
   async getPipelines(): Promise<PipelineDto[]> {
     return this.amoCrmService.getPipelines();
+  }
+
+  @Get('statuses')
+  async getStatuses(): Promise<{ [k: string]: StatusDto }> {
+    return this.amoCrmService.getStatuses();
   }
 
   @Get('users')

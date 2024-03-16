@@ -15,6 +15,7 @@ import {
 import { LeadDto } from 'src/dto/lead.dto';
 import { PipelineDto } from 'src/dto/pipeline.dto';
 import { UserDto } from 'src/dto/user.dto';
+import { StatusDto } from 'src/dto/status.dto';
 
 const DEFAULT_QUERY: QueryParams = {
   query: '',
@@ -90,6 +91,22 @@ export class AmoCrmService {
     } = response;
 
     return pipelines.map((it) => new PipelineDto(it));
+  }
+
+  public async getStatuses(): Promise<{ [k: string]: StatusDto }> {
+    const pipelines = await this.getPipelines();
+    const statuses = pipelines.reduce(
+      (acc, { statuses }) => [...acc, ...statuses],
+      [],
+    );
+
+    return statuses.reduce(
+      (acc, cur) => ({
+        ...acc,
+        [cur.id]: cur,
+      }),
+      {},
+    );
   }
 
   public async getUser(id: number): Promise<UserDto> {
