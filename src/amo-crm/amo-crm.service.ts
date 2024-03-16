@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
 import { AmoCrm, AmoCrmPath } from '../const';
-import { clearObject, generateFakeLead } from '../utils';
+import { clearObject, generateFakeLead, generateFakeUser } from '../utils';
 import {
   AmoCrmResponse,
   GetLeadsResponse,
@@ -11,11 +11,12 @@ import {
   RawPipeline,
   RawUser,
   ResponseEntity,
-} from 'src/types';
-import { LeadDto } from 'src/dto/lead.dto';
-import { PipelineDto } from 'src/dto/pipeline.dto';
-import { UserDto } from 'src/dto/user.dto';
-import { StatusDto } from 'src/dto/status.dto';
+} from '../types';
+import { LeadDto } from '../dto/lead.dto';
+import { PipelineDto } from '../dto/pipeline.dto';
+import { UserDto } from '../dto/user.dto';
+import { StatusDto } from '../dto/status.dto';
+import { faker } from '@faker-js/faker';
 
 const DEFAULT_QUERY: QueryParams = {
   query: '',
@@ -125,10 +126,29 @@ export class AmoCrmService {
   }
 
   public async seedLeeds(count: number): Promise<void> {
+    await this.seedUsers();
+
+    const { users } = (await this.request<'users', RawUser[]>('/users'))
+      ._embedded;
+
+    const [pipeline] = await this.getPipelines();
+
     const leads = Array(Math.max(count, AmoCrm.MAX_CREATE_LEADS))
       .fill(0)
-      .map(() => generateFakeLead());
+      .map(() => {
+        const user = faker.helpers.arrayElement(users);
+        const status = faker.helpers.arrayElement(pipeline.statuses);
+        return generateFakeLead(user.id, pipeline.id, status.id);
+      });
 
     return this.httpClient.post('/leads/complex', leads);
+  }
+
+  public async seedUsers(): Promise<void> {
+    const users = Array(10)
+      .fill(0)
+      .map(() => generateFakeUser());
+
+    await this.httpClient.post('/users', users);
   }
 }

@@ -1,5 +1,5 @@
 import { fakerRU as faker } from '@faker-js/faker';
-import { RawLead } from './types';
+import { RawLead, RawUser } from './types';
 
 export const clearObject = (
   object: Record<string, any>,
@@ -9,9 +9,25 @@ export const clearObject = (
   );
 };
 
-export const generateFakeLead = (): Partial<RawLead> => {
+export const generateFakeLead = (
+  userId: number,
+  pipelineId: number,
+  statusId: number,
+): Partial<RawLead> => {
   return {
-    name: faker.lorem.sentence({ min: 3, max: 5 }),
-    price: faker.helpers.rangeToNumber({ min: 1000, max: 10000000 }),
+    name: faker.person.fullName(),
+    price: faker.number.int({ min: 1000, max: 10000000 }),
+    responsible_user_id: userId,
+    status_id: statusId,
+    pipeline_id: pipelineId,
+  };
+};
+
+export const generateFakeUser = (): Partial<RawUser> => {
+  return {
+    name: faker.person.fullName(),
+    email: faker.internet.email(),
+    password: faker.internet.password(),
+    'rights[is_free]': true,
   };
 };

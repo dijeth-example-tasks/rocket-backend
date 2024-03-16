@@ -24,12 +24,14 @@ export interface RawPipeline {
 }
 
 export interface RawUser {
-  id: number;
+  id?: number;
   name: string;
   email: string;
+  password?: string;
+  ['rights[is_free]']?: boolean;
 }
 
-export type ResponseEntity = 'leads' | 'pipelines';
+export type ResponseEntity = 'leads' | 'pipelines' | 'users';
 
 export interface AmoCrmResponse<K extends ResponseEntity, T> {
   _page?: number;
