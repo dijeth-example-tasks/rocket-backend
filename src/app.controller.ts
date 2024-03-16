@@ -1,10 +1,20 @@
-import { Controller, Get, ParseIntPipe, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  ParseIntPipe,
+  Query,
+  UsePipes,
+} from '@nestjs/common';
 import { AppService } from './app.service';
 import { AmoCrmService } from './amo-crm/amo-crm.service';
 import { GetLastItem } from './pipes/get-last-item.pipe';
 import { CheckSizePipe } from './pipes/check-size.pipe';
 import { PipelineDto } from './dto/pipeline.dto';
 import { GetLeadsResponse } from './types';
+import { UserDto } from './dto/user.dto';
+import { UsersBodyValidation } from './pipes/users-body-validation.pipe';
+import { GetUsersBodyDto } from './dto/get-uses-body.dto';
 
 @Controller('api')
 export class AppController {
@@ -43,5 +53,11 @@ export class AppController {
   @Get('pipelines')
   async getPipelines(): Promise<PipelineDto[]> {
     return this.amoCrmService.getPipelines();
+  }
+
+  @Get('users')
+  @UsePipes(new UsersBodyValidation())
+  async getUsers(@Body() { ids }: GetUsersBodyDto): Promise<UserDto[]> {
+    return this.amoCrmService.getUsers(ids);
   }
 }

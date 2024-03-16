@@ -3,4 +3,5 @@ export const AmoCrmPath = {
   CREATE_MANY_LEADS: '/leads/complex',
   GET_LEADS: '/leads',
   GET_PIPELINES: '/leads/pipelines',
+  GET_USERS: '/users',
 };

@@ -23,7 +23,13 @@ export interface RawPipeline {
   };
 }
 
-export type ResponseEntity = 'leads' | 'user' | 'pipelines';
+export interface RawUser {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export type ResponseEntity = 'leads' | 'pipelines';
 
 export interface AmoCrmResponse<K extends ResponseEntity, T> {
   _page?: number;

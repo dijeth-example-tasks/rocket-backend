@@ -9,10 +9,12 @@ import {
   QueryParams,
   RawLead,
   RawPipeline,
+  RawUser,
   ResponseEntity,
 } from 'src/types';
 import { LeadDto } from 'src/dto/lead.dto';
 import { PipelineDto } from 'src/dto/pipeline.dto';
+import { UserDto } from 'src/dto/user.dto';
 
 const DEFAULT_QUERY: QueryParams = {
   query: '',
@@ -42,6 +44,11 @@ export class AmoCrmService {
         Authorization: `Bearer ${config.get('LONG_TERM_ACCESS_TOKEN')}`,
       },
     });
+  }
+
+  private async requestOne<T>(path: string, id: number): Promise<T> {
+    const response = await this.httpClient.get(`${path}/${id}`);
+    return response.data;
   }
 
   private async request<K extends ResponseEntity, T>(
@@ -83,6 +90,21 @@ export class AmoCrmService {
     } = response;
 
     return pipelines.map((it) => new PipelineDto(it));
+  }
+
+  public async getUser(id: number): Promise<UserDto> {
+    try {
+      const response = await this.requestOne<RawUser>(AmoCrmPath.GET_USERS, id);
+      return response ? new UserDto(response) : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  public async getUsers(ids: number[]): Promise<UserDto[]> {
+    const uniqueIds = Array.from(new Set(ids).values());
+    const users = await Promise.all(uniqueIds.map((id) => this.getUser(id)));
+    return users.filter(Boolean);
   }
 
   public async seedLeeds(count: number): Promise<void> {
