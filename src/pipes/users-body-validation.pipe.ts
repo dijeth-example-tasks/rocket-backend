@@ -1,5 +1,5 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
-import { GetUsersBodyDto } from 'src/dto/get-uses-body.dto';
+import { GetUsersBodyDto } from '../dto/get-uses-body.dto';
 
 @Injectable()
 export class UsersBodyValidation implements PipeTransform {

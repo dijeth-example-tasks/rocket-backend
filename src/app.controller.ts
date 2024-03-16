@@ -6,7 +6,6 @@ import {
   Query,
   UsePipes,
 } from '@nestjs/common';
-import { AppService } from './app.service';
 import { AmoCrmService } from './amo-crm/amo-crm.service';
 import { GetLastItem } from './pipes/get-last-item.pipe';
 import { CheckSizePipe } from './pipes/check-size.pipe';
@@ -19,15 +18,7 @@ import { StatusDto } from './dto/status.dto';
 
 @Controller('api')
 export class AppController {
-  constructor(
-    private readonly appService: AppService,
-    private readonly amoCrmService: AmoCrmService,
-  ) {}
-
-  @Get('hello')
-  getHello(): string {
-    return this.appService.getHello();
-  }
+  constructor(private readonly amoCrmService: AmoCrmService) {}
 
   @Get('leads')
   async getLeads(
