@@ -10,11 +10,13 @@ import { AmoCrmService } from './amo-crm/amo-crm.service';
 import { GetLastItem } from './pipes/get-last-item.pipe';
 import { CheckSizePipe } from './pipes/check-size.pipe';
 import { PipelineDto } from './dto/pipeline.dto';
-import { GetLeadsResponse } from './types';
 import { UserDto } from './dto/user.dto';
 import { UsersBodyValidation } from './pipes/users-body-validation.pipe';
 import { GetUsersBodyDto } from './dto/get-uses-body.dto';
 import { StatusDto } from './dto/status.dto';
+import { LeadDto } from './dto/lead.dto';
+import { GetResponse } from './types';
+import { LeadWithUserDto } from './dto/lead-with-user.dto';
 
 @Controller('api')
 export class AppController {
@@ -38,8 +40,30 @@ export class AppController {
       new ParseIntPipe({ optional: true }),
     )
     limit?: number,
-  ): Promise<GetLeadsResponse> {
+  ): Promise<GetResponse<LeadDto[]>> {
     return this.amoCrmService.getLeads({ query, page, limit });
+  }
+
+  @Get('leads-users')
+  async getLeadsWithUser(
+    @Query('query', new GetLastItem<string>(), new CheckSizePipe(3))
+    query?: string,
+
+    @Query(
+      'page',
+      new GetLastItem<string>(),
+      new ParseIntPipe({ optional: true }),
+    )
+    page?: number,
+
+    @Query(
+      'limit',
+      new GetLastItem<string>(),
+      new ParseIntPipe({ optional: true }),
+    )
+    limit?: number,
+  ): Promise<GetResponse<LeadWithUserDto[]>> {
+    return this.amoCrmService.getLeadsWithUser({ query, page, limit });
   }
 
   @Get('pipelines')

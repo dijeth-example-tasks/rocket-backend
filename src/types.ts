@@ -1,5 +1,3 @@
-import { LeadDto } from './dto/lead.dto';
-
 export interface RawLead {
   id: number;
   name: string;
@@ -54,8 +52,8 @@ export interface AmoCrmResponse<K extends ResponseEntity, T> {
   };
 }
 
-export interface GetLeadsResponse {
-  leads: LeadDto[];
+export interface GetResponse<T> {
+  data: T;
   done: boolean;
 }
 

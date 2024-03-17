@@ -5,7 +5,7 @@ import { AmoCrm, AmoCrmPath } from '../const';
 import { clearObject, generateFakeLead, generateFakeUser } from '../utils';
 import {
   AmoCrmResponse,
-  GetLeadsResponse,
+  GetResponse,
   QueryParams,
   RawLead,
   RawPipeline,
@@ -17,6 +17,7 @@ import { PipelineDto } from '../dto/pipeline.dto';
 import { UserDto } from '../dto/user.dto';
 import { StatusDto } from '../dto/status.dto';
 import { faker } from '@faker-js/faker';
+import { LeadWithUserDto } from 'src/dto/lead-with-user.dto';
 
 const DEFAULT_QUERY: QueryParams = {
   query: '',
@@ -60,14 +61,16 @@ export class AmoCrmService {
     return response.data;
   }
 
-  public async getLeads(queryParams: QueryParams): Promise<GetLeadsResponse> {
+  public async getLeads(
+    queryParams: QueryParams,
+  ): Promise<GetResponse<LeadDto[]>> {
     const query = normalizeQuery(queryParams);
     const path = `${AmoCrmPath.GET_LEADS}?${query.toString()}`;
 
     const response = await this.request<'leads', RawLead[]>(path);
 
     if (!response) {
-      return { leads: [], done: true };
+      return { data: [], done: true };
     }
 
     const {
@@ -75,7 +78,28 @@ export class AmoCrmService {
       _links: { next },
     } = response;
 
-    return { leads: leads.map((it) => new LeadDto(it)), done: !next };
+    return { data: leads.map((it) => new LeadDto(it)), done: !next };
+  }
+
+  public async getLeadsWithUser(
+    queryParams: QueryParams,
+  ): Promise<GetResponse<LeadWithUserDto[]>> {
+    const leadsResponse = await this.getLeads(queryParams);
+    const userIds = leadsResponse.data.map(
+      ({ responsibleUserId }) => responsibleUserId,
+    );
+
+    const users = await this.getUsers(userIds);
+    const userDictionary = users.reduce(
+      (acc, cur) => ({ ...acc, [cur.id]: cur }),
+      {},
+    );
+
+    const leadsWithUser = leadsResponse.data.map(
+      (it) => new LeadWithUserDto(it, userDictionary[it.responsibleUserId]),
+    );
+
+    return { done: leadsResponse.done, data: leadsWithUser };
   }
 
   public async getPipelines(): Promise<PipelineDto[]> {
