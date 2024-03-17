@@ -1,4 +1,4 @@
-import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
+import { PipeTransform, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class GetLastItem<T = any> implements PipeTransform<T | T[], T> {
@@ -8,7 +8,7 @@ export class GetLastItem<T = any> implements PipeTransform<T | T[], T> {
     }
 
     if (!value.length) {
-      throw new BadRequestException('Validation failed');
+      return undefined;
     }
 
     return value.at(-1);

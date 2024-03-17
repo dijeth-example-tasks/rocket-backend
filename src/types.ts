@@ -26,7 +26,7 @@ export interface RawUser {
   name: string;
   email: string;
   password?: string;
-  ['rights[is_free]']?: boolean;
+  'rights[is_free]'?: boolean;
 }
 
 export type ResponseEntity = 'leads' | 'pipelines' | 'users';

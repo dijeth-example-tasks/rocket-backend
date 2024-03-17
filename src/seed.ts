@@ -11,7 +11,7 @@ async function bootstrap() {
 }
 
 bootstrap()
-  .then((service) => service.seedLeeds(5))
+  .then((service) => service.seedLeeds(50))
   .then(() => app.close())
   .then(() => {
     console.log('Done!');

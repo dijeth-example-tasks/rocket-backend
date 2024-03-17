@@ -1,4 +1,4 @@
-import { RawUser } from 'src/types';
+import { RawUser } from '../types';
 
 export class UserDto {
   readonly id: number;

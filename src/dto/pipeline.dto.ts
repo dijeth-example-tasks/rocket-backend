@@ -1,4 +1,4 @@
-import { RawPipeline } from 'src/types';
+import { RawPipeline } from '../types';
 import { StatusDto } from './status.dto';
 
 export class PipelineDto {

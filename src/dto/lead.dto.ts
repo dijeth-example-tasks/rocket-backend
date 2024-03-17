@@ -1,4 +1,4 @@
-import { RawLead } from 'src/types';
+import { RawLead } from '../types';
 
 export class LeadDto {
   readonly id: number;

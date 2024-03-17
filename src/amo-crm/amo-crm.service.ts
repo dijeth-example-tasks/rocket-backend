@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
 import { AmoCrm, AmoCrmPath } from '../const';
@@ -17,7 +17,7 @@ import { PipelineDto } from '../dto/pipeline.dto';
 import { UserDto } from '../dto/user.dto';
 import { StatusDto } from '../dto/status.dto';
 import { faker } from '@faker-js/faker';
-import { LeadWithUserDto } from 'src/dto/lead-with-user.dto';
+import { LeadWithUserDto } from '../dto/lead-with-user.dto';
 
 const DEFAULT_QUERY: QueryParams = {
   query: '',
@@ -50,15 +50,23 @@ export class AmoCrmService {
   }
 
   private async requestOne<T>(path: string, id: number): Promise<T> {
-    const response = await this.httpClient.get(`${path}/${id}`);
-    return response.data;
+    try {
+      const response = await this.httpClient.get(`${path}/${id}`);
+      return response.data;
+    } catch (err) {
+      throw new ServiceUnavailableException(err);
+    }
   }
 
   private async request<K extends ResponseEntity, T>(
     path: string,
   ): Promise<AmoCrmResponse<K, T>> {
-    const response = await this.httpClient.get(path);
-    return response.data;
+    try {
+      const response = await this.httpClient.get(path);
+      return response.data;
+    } catch (err) {
+      throw new ServiceUnavailableException(err);
+    }
   }
 
   public async getLeads(

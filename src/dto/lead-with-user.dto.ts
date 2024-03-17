@@ -1,4 +1,4 @@
-import { RawLead } from 'src/types';
+import { RawLead } from '../types';
 import { LeadDto } from './lead.dto';
 import { UserDto } from './user.dto';
 

@@ -15,7 +15,7 @@ export const generateFakeLead = (
   statusId: number,
 ): Partial<RawLead> => {
   return {
-    name: faker.person.fullName(),
+    name: faker.lorem.sentence({ min: 3, max: 5 }),
     price: faker.number.int({ min: 1000, max: 10000000 }),
     responsible_user_id: userId,
     status_id: statusId,
@@ -24,9 +24,11 @@ export const generateFakeLead = (
 };
 
 export const generateFakeUser = (): Partial<RawUser> => {
+  const name = faker.person.fullName();
+  const [firstName, lastName] = name.split(' ');
   return {
-    name: faker.person.fullName(),
-    email: faker.internet.email(),
+    name,
+    email: faker.internet.email({ firstName, lastName }),
     password: faker.internet.password(),
     'rights[is_free]': true,
   };

@@ -1,4 +1,4 @@
-import { RawStatus } from 'src/types';
+import { RawStatus } from '../types';
 
 export class StatusDto {
   readonly id: number;
