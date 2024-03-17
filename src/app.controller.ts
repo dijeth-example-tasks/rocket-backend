@@ -44,8 +44,8 @@ export class AppController {
     return this.amoCrmService.getLeads({ query, page, limit });
   }
 
-  @Get('leads-users')
-  async getLeadsWithUser(
+  @Get('filled-leads')
+  async getfilledLeads(
     @Query('query', new GetLastItem<string>(), new CheckSizePipe(3))
     query?: string,
 
@@ -63,7 +63,22 @@ export class AppController {
     )
     limit?: number,
   ): Promise<GetResponse<LeadWithUserDto[]>> {
-    return this.amoCrmService.getLeadsWithUser({ query, page, limit });
+    return this.amoCrmService.getfilledLeads({ query, page, limit });
+  }
+
+  @Get('all-leads')
+  async getAllLeads(
+    @Query('query', new GetLastItem<string>(), new CheckSizePipe(3))
+    query?: string,
+
+    @Query(
+      'limit',
+      new GetLastItem<string>(),
+      new ParseIntPipe({ optional: true }),
+    )
+    limit?: number,
+  ): Promise<LeadDto[]> {
+    return this.amoCrmService.getAllLeads({ query, limit });
   }
 
   @Get('pipelines')

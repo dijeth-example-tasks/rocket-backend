@@ -36,6 +36,19 @@ const normalizeQuery = (queryParams: QueryParams): URLSearchParams => {
   return query;
 };
 
+const fetchAllPages = async function* <T>(
+  fetchFn: (page: number) => Promise<GetResponse<T>>,
+) {
+  let page = 1;
+  let response: GetResponse<T>;
+  do {
+    response = await fetchFn(page);
+    page++;
+    yield response.data;
+  } while (!response.done);
+  return;
+};
+
 @Injectable()
 export class AmoCrmService {
   private httpClient: AxiosInstance;
@@ -63,6 +76,7 @@ export class AmoCrmService {
   ): Promise<AmoCrmResponse<K, T>> {
     try {
       const response = await this.httpClient.get(path);
+      // throw new Error('Uuups');
       return response.data;
     } catch (err) {
       throw new ServiceUnavailableException(err);
@@ -89,7 +103,7 @@ export class AmoCrmService {
     return { data: leads.map((it) => new LeadDto(it)), done: !next };
   }
 
-  public async getLeadsWithUser(
+  public async getfilledLeads(
     queryParams: QueryParams,
   ): Promise<GetResponse<LeadWithUserDto[]>> {
     const leadsResponse = await this.getLeads(queryParams);
@@ -155,6 +169,19 @@ export class AmoCrmService {
     const uniqueIds = Array.from(new Set(ids).values());
     const users = await Promise.all(uniqueIds.map((id) => this.getUser(id)));
     return users.filter(Boolean);
+  }
+
+  public async getAllLeads(
+    queryParams: Omit<QueryParams, 'page'>,
+  ): Promise<LeadWithUserDto[]> {
+    const leads: LeadWithUserDto[] = [];
+    for await (const page of fetchAllPages<LeadWithUserDto[]>((p) => {
+      const query = { ...queryParams, page: p };
+      return this.getfilledLeads(query);
+    })) {
+      leads.push(...page);
+    }
+    return leads;
   }
 
   public async seedLeeds(count: number): Promise<void> {
