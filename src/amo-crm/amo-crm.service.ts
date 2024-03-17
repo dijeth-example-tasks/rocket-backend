@@ -11,13 +11,13 @@ import {
   RawPipeline,
   RawUser,
   ResponseEntity,
+  StatusDictionary,
 } from '../types';
 import { LeadDto } from '../dto/lead.dto';
 import { PipelineDto } from '../dto/pipeline.dto';
 import { UserDto } from '../dto/user.dto';
-import { StatusDto } from '../dto/status.dto';
 import { faker } from '@faker-js/faker';
-import { LeadWithUserDto } from '../dto/lead-with-user.dto';
+import { FilledLeadDto } from '../dto/lead-with-user.dto';
 
 const DEFAULT_QUERY: QueryParams = {
   query: '',
@@ -103,10 +103,13 @@ export class AmoCrmService {
     return { data: leads.map((it) => new LeadDto(it)), done: !next };
   }
 
-  public async getfilledLeads(
+  public async getFilledLeads(
     queryParams: QueryParams,
-  ): Promise<GetResponse<LeadWithUserDto[]>> {
+    cachedStatuses?: StatusDictionary,
+  ): Promise<GetResponse<FilledLeadDto[]>> {
+    const statuses = cachedStatuses || (await this.getStatuses());
     const leadsResponse = await this.getLeads(queryParams);
+
     const userIds = leadsResponse.data.map(
       ({ responsibleUserId }) => responsibleUserId,
     );
@@ -118,7 +121,12 @@ export class AmoCrmService {
     );
 
     const leadsWithUser = leadsResponse.data.map(
-      (it) => new LeadWithUserDto(it, userDictionary[it.responsibleUserId]),
+      (it) =>
+        new FilledLeadDto(
+          it,
+          userDictionary[it.responsibleUserId],
+          statuses[it.statusId],
+        ),
     );
 
     return { done: leadsResponse.done, data: leadsWithUser };
@@ -140,7 +148,7 @@ export class AmoCrmService {
     return pipelines.map((it) => new PipelineDto(it));
   }
 
-  public async getStatuses(): Promise<{ [k: string]: StatusDto }> {
+  public async getStatuses(): Promise<StatusDictionary> {
     const pipelines = await this.getPipelines();
     const statuses = pipelines.reduce(
       (acc, { statuses }) => [...acc, ...statuses],
@@ -173,11 +181,13 @@ export class AmoCrmService {
 
   public async getAllLeads(
     queryParams: Omit<QueryParams, 'page'>,
-  ): Promise<LeadWithUserDto[]> {
-    const leads: LeadWithUserDto[] = [];
-    for await (const page of fetchAllPages<LeadWithUserDto[]>((p) => {
+  ): Promise<FilledLeadDto[]> {
+    const statuses = await this.getStatuses();
+
+    const leads: FilledLeadDto[] = [];
+    for await (const page of fetchAllPages<FilledLeadDto[]>((p) => {
       const query = { ...queryParams, page: p };
-      return this.getfilledLeads(query);
+      return this.getFilledLeads(query, statuses);
     })) {
       leads.push(...page);
     }

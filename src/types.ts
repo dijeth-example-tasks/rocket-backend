@@ -1,3 +1,5 @@
+import { StatusDto } from './dto/status.dto';
+
 export interface RawLead {
   id: number;
   name: string;
@@ -62,3 +64,5 @@ export type QueryParams = {
   page?: number;
   limit?: number;
 };
+
+export type StatusDictionary = { [k: string]: StatusDto };

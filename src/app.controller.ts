@@ -13,10 +13,9 @@ import { PipelineDto } from './dto/pipeline.dto';
 import { UserDto } from './dto/user.dto';
 import { UsersBodyValidation } from './pipes/users-body-validation.pipe';
 import { GetUsersBodyDto } from './dto/get-uses-body.dto';
-import { StatusDto } from './dto/status.dto';
 import { LeadDto } from './dto/lead.dto';
-import { GetResponse } from './types';
-import { LeadWithUserDto } from './dto/lead-with-user.dto';
+import { GetResponse, StatusDictionary } from './types';
+import { FilledLeadDto } from './dto/lead-with-user.dto';
 
 @Controller('api')
 export class AppController {
@@ -45,7 +44,7 @@ export class AppController {
   }
 
   @Get('filled-leads')
-  async getfilledLeads(
+  async getFilledLeads(
     @Query('query', new GetLastItem<string>(), new CheckSizePipe(3))
     query?: string,
 
@@ -62,8 +61,8 @@ export class AppController {
       new ParseIntPipe({ optional: true }),
     )
     limit?: number,
-  ): Promise<GetResponse<LeadWithUserDto[]>> {
-    return this.amoCrmService.getfilledLeads({ query, page, limit });
+  ): Promise<GetResponse<FilledLeadDto[]>> {
+    return this.amoCrmService.getFilledLeads({ query, page, limit });
   }
 
   @Get('all-leads')
@@ -87,7 +86,7 @@ export class AppController {
   }
 
   @Get('statuses')
-  async getStatuses(): Promise<{ [k: string]: StatusDto }> {
+  async getStatuses(): Promise<StatusDictionary> {
     return this.amoCrmService.getStatuses();
   }
 

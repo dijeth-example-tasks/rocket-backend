@@ -1,11 +1,13 @@
 import { RawLead } from '../types';
 import { LeadDto } from './lead.dto';
+import { StatusDto } from './status.dto';
 import { UserDto } from './user.dto';
 
-export class LeadWithUserDto extends LeadDto {
+export class FilledLeadDto extends LeadDto {
   readonly user: UserDto;
+  readonly status: StatusDto;
 
-  constructor(lead: RawLead | LeadDto, user: UserDto) {
+  constructor(lead: RawLead | LeadDto, user: UserDto, status: StatusDto) {
     let rawLead: RawLead;
     if (lead instanceof LeadDto) {
       rawLead = {
@@ -22,5 +24,6 @@ export class LeadWithUserDto extends LeadDto {
     }
     super(rawLead);
     this.user = user;
+    this.status = status;
   }
 }
