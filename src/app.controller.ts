@@ -93,6 +93,6 @@ export class AppController {
   @Get('users')
   @UsePipes(new UsersBodyValidation())
   async getUsers(@Body() { ids }: GetUsersBodyDto): Promise<UserDto[]> {
-    return this.amoCrmService.getUsers(ids);
+    return this.amoCrmService.getUsersById(ids);
   }
 }

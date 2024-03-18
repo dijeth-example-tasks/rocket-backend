@@ -114,7 +114,7 @@ export class AmoCrmService {
       ({ responsibleUserId }) => responsibleUserId,
     );
 
-    const users = await this.getUsers(userIds);
+    const users = await this.getUsersById(userIds);
     const userDictionary = users.reduce(
       (acc, cur) => ({ ...acc, [cur.id]: cur }),
       {},
@@ -173,7 +173,7 @@ export class AmoCrmService {
     }
   }
 
-  public async getUsers(ids: number[]): Promise<UserDto[]> {
+  public async getUsersById(ids: number[]): Promise<UserDto[]> {
     const uniqueIds = Array.from(new Set(ids).values());
     const users = await Promise.all(uniqueIds.map((id) => this.getUser(id)));
     return users.filter(Boolean);
