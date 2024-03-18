@@ -12,6 +12,7 @@ import {
   RawUser,
   ResponseEntity,
   StatusDictionary,
+  UserDictionary,
 } from '../types';
 import { LeadDto } from '../dto/lead.dto';
 import { PipelineDto } from '../dto/pipeline.dto';
@@ -76,11 +77,30 @@ export class AmoCrmService {
   ): Promise<AmoCrmResponse<K, T>> {
     try {
       const response = await this.httpClient.get(path);
-      // throw new Error('Uuups');
       return response.data;
     } catch (err) {
       throw new ServiceUnavailableException(err);
     }
+  }
+
+  public async getUsers(
+    queryParams: QueryParams,
+  ): Promise<GetResponse<UserDto[]>> {
+    const query = normalizeQuery(queryParams);
+    const path = `${AmoCrmPath.GET_USERS}?${query.toString()}`;
+
+    const response = await this.request<'users', RawUser[]>(path);
+
+    if (!response) {
+      return { data: [], done: true };
+    }
+
+    const {
+      _embedded: { users },
+      _links: { next },
+    } = response;
+
+    return { data: users.map((it) => new UserDto(it)), done: !next };
   }
 
   public async getLeads(
@@ -106,30 +126,22 @@ export class AmoCrmService {
   public async getFilledLeads(
     queryParams: QueryParams,
     cachedStatuses?: StatusDictionary,
+    cachedUsers?: UserDictionary,
   ): Promise<GetResponse<FilledLeadDto[]>> {
     const statuses = cachedStatuses || (await this.getStatuses());
+    const users = cachedUsers || (await this.getAllUsers({}));
     const leadsResponse = await this.getLeads(queryParams);
 
-    const userIds = leadsResponse.data.map(
-      ({ responsibleUserId }) => responsibleUserId,
-    );
-
-    const users = await this.getUsersById(userIds);
-    const userDictionary = users.reduce(
-      (acc, cur) => ({ ...acc, [cur.id]: cur }),
-      {},
-    );
-
-    const leadsWithUser = leadsResponse.data.map(
+    const filledLeads = leadsResponse.data.map(
       (it) =>
         new FilledLeadDto(
           it,
-          userDictionary[it.responsibleUserId],
+          users[it.responsibleUserId],
           statuses[it.statusId],
         ),
     );
 
-    return { done: leadsResponse.done, data: leadsWithUser };
+    return { done: leadsResponse.done, data: filledLeads };
   }
 
   public async getPipelines(): Promise<PipelineDto[]> {
@@ -182,16 +194,31 @@ export class AmoCrmService {
   public async getAllLeads(
     queryParams: Omit<QueryParams, 'page'>,
   ): Promise<FilledLeadDto[]> {
-    const statuses = await this.getStatuses();
+    const [statuses, users] = await Promise.all([
+      this.getStatuses(),
+      this.getAllUsers({}),
+    ]);
 
     const leads: FilledLeadDto[] = [];
-    for await (const page of fetchAllPages<FilledLeadDto[]>((p) => {
-      const query = { ...queryParams, page: p };
-      return this.getFilledLeads(query, statuses);
-    })) {
+    for await (const page of fetchAllPages<FilledLeadDto[]>((p) =>
+      this.getFilledLeads({ ...queryParams, page: p }, statuses, users),
+    )) {
       leads.push(...page);
     }
     return leads;
+  }
+
+  public async getAllUsers(
+    queryParams: Omit<QueryParams, 'page'>,
+  ): Promise<UserDictionary> {
+    const users: UserDto[] = [];
+    for await (const page of fetchAllPages<UserDto[]>((p) => {
+      const query = { ...queryParams, page: p };
+      return this.getUsers(query);
+    })) {
+      users.push(...page);
+    }
+    return users.reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {});
   }
 
   public async seedLeeds(count: number): Promise<void> {

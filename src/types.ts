@@ -1,4 +1,5 @@
 import { StatusDto } from './dto/status.dto';
+import { UserDto } from './dto/user.dto';
 
 export interface RawLead {
   id: number;
@@ -65,4 +66,6 @@ export type QueryParams = {
   limit?: number;
 };
 
-export type StatusDictionary = { [k: string]: StatusDto };
+export type Dictionary<T> = { [k: string]: T };
+export type StatusDictionary = Dictionary<StatusDto>;
+export type UserDictionary = Dictionary<UserDto>;
