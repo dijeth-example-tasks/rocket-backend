@@ -2,6 +2,10 @@
 
 Фронтенд-часть находится по [ссылке](https://github.com/dijeth-example-tasks/rocket-ui).
 
+## Демо
+
+Демо проекта находится по [ссылке](https://dijeth-example-tasks.github.io/rocket-ui/)
+
 ## Установка
 
 ```bash
